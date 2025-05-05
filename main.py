@@ -6,7 +6,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 # === กำหนดค่าเบื้องต้น ===
 LINE_TOKEN = "V3PaJfhewTTKFmp8x7Ewn0lVP8yVMUjdOcbPz14U2SGPQy4NVJeCTo93v6Gpcne4WhaUfcQdEECnOz9RKlaHvDlhMg1DB1EDgRlBUzEfr8GveyVjbb+dzT6eh8v1Of3MA3FHYvvBxvTZNqMwUN2VegdB04t89/1O/w1cDnyilFU="
-SPREADSHEET_NAME = "2 พ.ค. 68"
+SPREADSHEET_NAME = "2april68"
 JSON_CREDENTIAL_PATH = "service_account.json"
 LAST_ROW_FILE = "last_row.pkl"
 
