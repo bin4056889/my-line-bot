@@ -14,7 +14,11 @@ LAST_ROW_FILE = "last_row.pkl"
 scope = ["https://spreadsheets.google.com/feeds",
          "https://www.googleapis.com/auth/drive"]
 
-creds = ServiceAccountCredentials.from_json_keyfile_name(JSON_CREDENTIAL_PATH, scope)
+try:
+    creds = ServiceAccountCredentials.from_json_keyfile_name(JSON_CREDENTIAL_PATH, scope)
+    print("✅ Credentials loaded successfully")
+except Exception as e:
+    print("❌ Failed to load credentials:", e)
 client = gspread.authorize(creds)
 sheet = client.open(SPREADSHEET_NAME).sheet1
 
