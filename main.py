@@ -2,7 +2,7 @@ import requests
 
 LINE_TOKEN = 'V3PaJfhewTTKFmp8x7Ewn0lVP8yVMUjdOcbPz14U2SGPQy4NVJeCTo93v6Gpcne4WhaUfcQdEECnOz9RKlaHvDlhMg1DB1EDgRlBUzEfr8GveyVjbb+dzT6eh8v1Of3MA3FHYvvBxvTZNqMwUN2VegdB04t89/1O/w1cDnyilFU='
 LINE_USER_ID = 'Uc56394608094708da3e9fcbf0f4e7778'
-SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbxsdyXGUTeoRGktxFlcogQ-F7H8D7Apq2fPl6-4oufsT98LeMj2gl64b16dx0-d-hKGeQ/exec'
+SHEET_API_URL = 'https://script.google.com/macros/s/AKfycby11NuRqjA2XrusxaUdvAKAK8tdox5NMxmsbG7j9kbU/dev'
 
 def get_data():
     response = requests.get(SHEET_API_URL)
