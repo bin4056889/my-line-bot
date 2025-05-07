@@ -1,69 +1,41 @@
-import gspread
-import time
-import pickle
 import requests
-from oauth2client.service_account import ServiceAccountCredentials
 
-# === กำหนดค่าเบื้องต้น ===
-LINE_TOKEN = "V3PaJfhewTTKFmp8x7Ewn0lVP8yVMUjdOcbPz14U2SGPQy4NVJeCTo93v6Gpcne4WhaUfcQdEECnOz9RKlaHvDlhMg1DB1EDgRlBUzEfr8GveyVjbb+dzT6eh8v1Of3MA3FHYvvBxvTZNqMwUN2VegdB04t89/1O/w1cDnyilFU="
-SPREADSHEET_NAME = "2april68"
-JSON_CREDENTIAL_PATH = "service_account.json"
-LAST_ROW_FILE = "last_row.pkl"
+LINE_TOKEN = 'YOUR_LINE_ACCESS_TOKEN'
+LINE_USER_ID = 'YOUR_USER_ID'
+SHEET_API_URL = 'YOUR_GOOGLE_SCRIPT_WEB_APP_URL'
 
-# === STEP 1: เชื่อมต่อ Google Sheets ===
-scope = ["https://spreadsheets.google.com/feeds",
-         "https://www.googleapis.com/auth/drive"]
+def get_data():
+    response = requests.get(SHEET_API_URL)
+    return response.json()
 
-try:
-    creds = ServiceAccountCredentials.from_json_keyfile_name(JSON_CREDENTIAL_PATH, scope)
-    print("✅ Credentials loaded successfully")
-except Exception as e:
-    print("❌ Failed to load credentials:", e)
-client = gspread.authorize(creds)
-sheet = client.open(SPREADSHEET_NAME).sheet1
+def format_message(data):
+    msg = '"บน"\n'
+    for i, row in enumerate(data["บน"]):
+        msg += f'แถวที่ {i+1}"{row["เลข"]}" = {row["ค่า"]}\n'
 
-# === STEP 2: โหลดสถานะแถวล่าสุดที่เคยดึง ===
-def load_last_row():
-    try:
-        with open(LAST_ROW_FILE, "rb") as f:
-            return pickle.load(f)
-    except FileNotFoundError:
-        return 1  # เริ่มจากแถวที่ 2 (index 1)
+    msg += '\n"ล่าง"\n'
+    for i, row in enumerate(data["ล่าง"]):
+        msg += f'แถวที่ {i+1}"{row["เลข"]}" = {row["ค่า"]}\n'
 
-# === STEP 3: บันทึกสถานะล่าสุดหลังส่งแล้ว ===
-def save_last_row(row):
-    with open(LAST_ROW_FILE, "wb") as f:
-        pickle.dump(row, f)
+    msg += '\n"โต๊ด"\n'
+    for i, row in enumerate(data["โต๊ด"]):
+        msg += f'แถวที่ {i+1}"{row["เลข"]}" = {row["ค่า"]}\n'
 
-# === STEP 4: ส่งข้อความไปยัง LINE Notify ===
-def send_line_notify(message):
-    url = "https://notify-api.line.me/api/notify"
-    headers = {"Authorization": f"Bearer {LINE_TOKEN}"}
-    data = {"message": message}
-    r = requests.post(url, headers=headers, data=data)
-    return r.status_code
+    return msg
 
-# === STEP 5: ดึงข้อมูลใหม่และส่งไป LINE ===
-def check_and_send():
-    last_row = load_last_row()
-    all_data = sheet.get_all_values()
+def push_line_message(text):
+    url = 'https://api.line.me/v2/bot/message/push'
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {LINE_TOKEN}'
+    }
+    body = {
+        'to': LINE_USER_ID,
+        'messages': [{'type': 'text', 'text': text}]
+    }
+    requests.post(url, headers=headers, json=body)
 
-    new_data = []
-    for i in range(last_row, len(all_data)):
-        row = all_data[i]
-        if len(row) > 0 and row[0].strip() != "":
-            new_data.append(row[0].strip())
-
-    if new_data:
-        message = "บน\n"
-        for number in new_data:
-            message += f"{number} = บน\n"
-        send_line_notify(message.strip())
-
-        save_last_row(last_row + len(new_data))
-
-# === STEP 6: วนลูปทุก 5 นาที ===
-if __name__ == "__main__":
-    while True:
-        check_and_send()
-        time.sleep(300)
+# MAIN
+data = get_data()
+msg = format_message(data)
+push_line_message(msg)
